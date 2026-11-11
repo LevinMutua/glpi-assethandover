@@ -18,9 +18,29 @@ switch ($action) {
         echo json_encode(PluginAssethandoverHandover::getUsers($q));
         break;
 
-    case 'user_detail':
+        case 'user_detail':
+        global $DB;
         $users_id = (int)($_GET['users_id'] ?? 0);
-        echo json_encode(PluginAssethandoverHandover::getUserDetail($users_id));
+        $detail   = PluginAssethandoverHandover::getUserDetail($users_id);
+        if (!is_array($detail)) { $detail = []; }
+
+        // Manager = the user's supervisor in GLPI
+        $detail['manager_name'] = '';
+        if ($users_id > 0) {
+            $_mres = $DB->doQuery("
+                SELECT CONCAT(COALESCE(s.firstname,''), ' ', COALESCE(s.realname,'')) AS n,
+                       s.name AS login
+                FROM glpi_users u
+                LEFT JOIN glpi_users s ON s.id = u.users_id_supervisor
+                WHERE u.id = $users_id
+            ");
+            if ($_mres && ($_mrow = $_mres->fetch_assoc())) {
+                $mgr = trim($_mrow['n'] ?? '');
+                if ($mgr === '') { $mgr = $_mrow['login'] ?? ''; } // fallback to login name
+                $detail['manager_name'] = $mgr;
+            }
+        }
+        echo json_encode($detail);
         break;
 
     case 'asset_history':
