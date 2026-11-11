@@ -563,12 +563,12 @@ Html::header($title, '', 'assets', 'PluginAssethandoverHandover');
                    placeholder="Fill manually">
           </div>
 
-          <!-- Manager Name -->
+          <!-- Manager Name (auto-filled from the user's supervisor in GLPI) -->
           <div class="ahf-field ahf-col-2">
             <label class="ahf-label">Manager's Name </label>
-            <input type="text" name="manager_name" class="ahf-input"
+            <input type="text" name="manager_name" id="manager_field" class="ahf-input"
                    value="<?php echo htmlspecialchars($handover['manager_name'] ?? ''); ?>"
-                   placeholder="Fill manually">
+                   placeholder="Auto-filled">
           </div>
 
           <!-- Assigned / Checked By — auto-filled from logged-in user -->
@@ -998,11 +998,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAssetMo
                             fetch(AJAX_URL + '?action=user_detail&users_id=' + this.dataset.id)
                                 .then(r => r.json())
                                 .then(d => {
-                                    if (d.department)  document.getElementById('department_field').value  = d.department;
+                                    if (d.department)   document.getElementById('department_field').value = d.department;
+                                    // Manager = user's supervisor in GLPI (overwrites on each user selection)
+                                    if (d.manager_name) document.getElementById('manager_field').value    = d.manager_name;
                                     if (d.position   && !document.getElementById('position_field').value)
                                         document.getElementById('position_field').value = d.position;
                                     if (d.employee_id && !document.getElementById('employee_id_field').value)
-                                        document.getElementById('employee_id_field').value = d.employee_id;
+                                        document.getElementById('employee_id_field').value = d.employee_id;;
                                 });
                         });
                     });
