@@ -301,5 +301,3 @@ class PluginAssethandoverPdf {
         return ob_get_clean();
     }
 }
-EOF
-php -l pdf.class.php
